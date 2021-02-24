@@ -29,9 +29,7 @@
 #include "turbofec/turbo.h"
 #include "turbo_int.h"
 
-#define API_EXPORT	__attribute__((__visibility__("default")))
-#define PARITY(X)	__builtin_parity(X)
-#define POPCNT(X)	__builtin_popcount(X)
+#include "turbofec/sysdefs.h"
 
 #define MAX_I		(188 + 1)
 
@@ -256,6 +254,9 @@ static int encode_n2(const struct lte_turbo_code *code,
 	gen = code->gen;
 	rgen = code->rgen;
 
+	//printf("Pariti 0x12345678 = %i\n", PARITY(0x12345678));
+	//printf("Pariti 0x127864aa = %i\n", PARITY(0x127864aa));
+
 	for (i = 0; i < len; i++) {
 		reg |= (PARITY((reg & rgen)) ^ c[i]) << (k - 1);
 		x[i] = c[i];
@@ -383,7 +384,7 @@ static void gen_deinterlv_map(int i)
 	}
 }
 
-__attribute__((constructor)) static void init()
+INITIALIZER(init)
 {
 	int i;
 
@@ -393,7 +394,7 @@ __attribute__((constructor)) static void init()
 		gen_deinterlv_map(i);
 }
 
-__attribute__((destructor)) static void release()
+static void release()
 {
 	int i;
 

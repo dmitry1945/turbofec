@@ -2,13 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <sys/time.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <sched.h>
+//#include <sys/time.h>
+//#include <pthread.h>
+//#include <unistd.h>
+//#include <sched.h>
+
 
 #include "noise.h"
 #include "turbofec/turbo.h"
+
+extern char* optarg;
+extern int optind, opterr, optopt;
+
+int getopt(int nargc, char* const nargv[], const char* ostr);
+
 
 #define MAX_LEN_BITS		32768
 #define MAX_LEN_BYTES		(32768/8)
@@ -152,11 +159,11 @@ static double get_timed_results(struct timeval *tv0, struct timeval *tv1,
 {
 	double elapsed;
 
-	elapsed = (tv1->tv_sec - tv0->tv_sec);
-	elapsed += (tv1->tv_usec - tv0->tv_usec) / 1e6;
-	printf("[..] Elapsed time....................... %f secs\n", elapsed);
-	printf("[..] Rate............................... %f Mbps\n",
-	       (float) threads * test->in_len * num_pkts / elapsed / 1e6);
+	//elapsed = (tv1->tv_sec - tv0->tv_sec);
+	//elapsed += (tv1->tv_usec - tv0->tv_usec) / 1e6;
+	//printf("[..] Elapsed time....................... %f secs\n", elapsed);
+	//printf("[..] Rate............................... %f Mbps\n",
+	//       (float) threads * test->in_len * num_pkts / elapsed / 1e6);
 
 	return elapsed;
 }
@@ -169,13 +176,13 @@ static int error_test(const struct lte_test_vector *test,
 	int8_t *bs0, *bs1, *bs2;
 	uint8_t *in, *bu0, *bu1, *bu2;
 
-	in  = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bu0 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bu1 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bu2 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bs0 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
-	bs1 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
-	bs2 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
+	in  = (uint8_t*)malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	bu0 = (uint8_t*)malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	bu1 = (uint8_t*)malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	bu2 = (uint8_t*)malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	bs0 = (int8_t*)malloc(sizeof(int8_t) * MAX_LEN_BITS);
+	bs1 = (int8_t*)malloc(sizeof(int8_t) * MAX_LEN_BITS);
+	bs2 = (int8_t*)malloc(sizeof(int8_t) * MAX_LEN_BITS);
 
 	struct tdecoder *tdec = alloc_tdec();
 
@@ -192,6 +199,13 @@ static int error_test(const struct lte_test_vector *test,
 		iber += uint8_to_err(bs0, bu0, LEN + 4, snr);
 		iber += uint8_to_err(bs1, bu1, LEN + 4, snr);
 		iber += uint8_to_err(bs2, bu2, LEN + 4, snr);
+
+		//printf("Data: ");
+		//for (size_t m = 0; m < test->in_len; m++)
+		//{
+		//	printf(" %i, ", bs2[m]);
+		//}
+		//printf("\n");
 
 		lte_turbo_decode_unpack(tdec, LEN, iter, bu0, bs0, bs1, bs2);
 
@@ -234,33 +248,33 @@ static int init_thread_arg(struct benchmark_thread_arg *arg,
 /* One benchmark benchmark thread with random valued input */
 static void *thread_test(void *ptr)
 {
-	int i;
-	int8_t *bs0, *bs1, *bs2;
-	uint8_t *in, *bu0, *bu1, *bu2;
-	struct benchmark_thread_arg *arg = (struct benchmark_thread_arg *) ptr;
+	//int i;
+	//int8_t *bs0, *bs1, *bs2;
+	//uint8_t *in, *bu0, *bu1, *bu2;
+	//struct benchmark_thread_arg *arg = (struct benchmark_thread_arg *) ptr;
 
-	in  = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bu0 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bu1 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bu2 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
-	bs0 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
-	bs1 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
-	bs2 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
+	//in  = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	//bu0 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	//bu1 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	//bu2 = malloc(sizeof(uint8_t) * MAX_LEN_BITS);
+	//bs0 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
+	//bs1 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
+	//bs2 = malloc(sizeof(int8_t) * MAX_LEN_BITS);
 
-	for (i = 0; i < arg->num_pkts; i++) {
-		lte_turbo_decode_unpack(arg->tdec, arg->code->len,
-					arg->iter, bu0, bs0, bs1, bs2);
-	}
+	//for (i = 0; i < arg->num_pkts; i++) {
+	//	lte_turbo_decode_unpack(arg->tdec, arg->code->len,
+	//				arg->iter, bu0, bs0, bs1, bs2);
+	//}
 
-	free(in);
-	free(bs0);
-	free(bs1);
-	free(bs2);
-	free(bu0);
-	free(bu1);
-	free(bu2);
+	//free(in);
+	//free(bs0);
+	//free(bs1);
+	//free(bs2);
+	//free(bu0);
+	//free(bu1);
+	//free(bu2);
 
-	pthread_exit(NULL);
+	//pthread_exit(NULL);
 }
 
 /* Fire off benchmark threads and measure elapsed time */
@@ -270,30 +284,31 @@ static double run_benchmark(const struct lte_test_vector *test,
 {
 	int i, rc, err = 0;
 	void *status;
-	struct timeval tv0, tv1;
-	pthread_t threads[MAX_THREADS];
+	//struct timeval tv0, tv1;
+	//pthread_t threads[MAX_THREADS];
 
-	for (i = 0; i < num_threads; i++) {
-		rc = init_thread_arg(&args[i], test, num_pkts, iter);
-		if (rc < 0)
-			return -1.0;
-	}
+	//for (i = 0; i < num_threads; i++) {
+	//	rc = init_thread_arg(&args[i], test, num_pkts, iter);
+	//	if (rc < 0)
+	//		return -1.0;
+	//}
 
-	gettimeofday(&tv0, NULL);
-	for (i = 0; i < num_threads; i++) {
-		pthread_create(&threads[i], NULL,
-			       thread_test, (void *) &args[i]);
-	}
-	for (i = 0; i < num_threads; i++) {
-		pthread_join(threads[i], &status);
-		err |= args[i].err;
-	}
-	gettimeofday(&tv1, NULL);
+	//gettimeofday(&tv0, NULL);
+	//for (i = 0; i < num_threads; i++) {
+	//	pthread_create(&threads[i], NULL,
+	//		       thread_test, (void *) &args[i]);
+	//}
+	//for (i = 0; i < num_threads; i++) {
+	//	pthread_join(threads[i], &status);
+	//	err |= args[i].err;
+	//}
+	//gettimeofday(&tv1, NULL);
 
-	if (err)
-		return -1.0;
+	//if (err)
+	//	return -1.0;
 
-	return get_timed_results(&tv0, &tv1, test, num_pkts, num_threads);
+	//return get_timed_results(&tv0, &tv1, test, num_pkts, num_threads);
+	return 0;
 }
 
 /* Verify output lengths */
@@ -409,7 +424,8 @@ int main(int argc, char *argv[])
 	struct cmd_options cmd;
 
 	handle_options(argc, argv, &cmd);
-	srandom(time(NULL));
+	//srandom(time(NULL));
+	srand(123);
 
 	for (test = tests; test->name; test++) {
 		if ((cmd.num > 0) && (cmd.num != ++cnt))

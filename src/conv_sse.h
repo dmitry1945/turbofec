@@ -36,7 +36,11 @@
 #define __always_inline inline
 #endif
 
-/*
+#if defined(_MSC_VER)
+#define __always_inline inline
+#endif
+
+ /*
  * Octo-Viterbi butterfly
  *
  * Compute 8-wide butterfly generating 16 path decisions and 16 accumulated

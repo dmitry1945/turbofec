@@ -26,7 +26,7 @@
 
 #include "turbofec/rate_match.h"
 
-#define API_EXPORT	__attribute__((__visibility__("default")))
+#include "turbofec/sysdefs.h"
 
 /*
  * These maximums are carried over from the turbo rate matcher
@@ -127,7 +127,8 @@ static void rate_match_fw(struct lte_rate_matcher *match, signed char *e, int E)
 	int *w_null = match->w_null;
 
 	int w_len = V * 3;
-	signed char w[w_len];
+	signed char w[4096];
+	//signed char w[w_len];
 
 	for (i = 0; i < 3; i++)
 		memcpy(&w[i * V], match->v[i], V * sizeof(char));
@@ -186,7 +187,8 @@ static void lte_conv_scramble(signed char *d, int rows, signed char *v,
 static void readout_rows(signed char *v, int rows)
 {
 	int i, n;
-	signed char val[32 * rows];
+//	signed char val[32 * rows];
+	signed char val[32 * 256];
 
 	for (i = 0; i < 32; i++) {
 		for (n = 0; n < rows; n++)
@@ -199,7 +201,8 @@ static void readout_rows(signed char *v, int rows)
 static void readin_rows(signed char *v, int rows)
 {
 	int i, n;
-	signed char val[32 * rows];
+//	signed char val[32 * rows];
+	signed char val[32 * 256];
 
 	for (i = 0; i < 32; i++) {
 		for (n = 0; n < rows; n++)
@@ -217,7 +220,8 @@ int interlv(signed char *v, int len, signed char *d)
 {
 	int i, rows = (int) ceil((float) len / 32.0);
 	int shift = rows * 32 - len;
-	signed char d_shift[rows * 32];
+//	signed char d_shift[rows * 32];
+	signed char d_shift[256 * 32];
 
 	for (i = 0; i < rows * 32; i++) {
 		if (i < shift)
@@ -291,7 +295,7 @@ static int rate_match_init_rv(struct lte_rate_matcher *match, int D, int E)
 	if ((D <= 0) || (E <= 0))
 		return -1;
 
-	signed char *e = calloc(E, sizeof(char));
+	signed char *e = (signed char*)calloc(E, sizeof(char));
 
 	rate_match_init_fw(match, NULL, D, e, E);
 

@@ -26,12 +26,13 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+
+#include "turbofec/sysdefs.h"
 #include "turbofec/turbo.h"
 #include "turbo_int.h"
 #include "turbo_sse.h"
 
-#define SSE_ALIGN		__attribute__((aligned(16)))
-#define API_EXPORT		__attribute__((__visibility__("default")))
+#include "turbofec/sysdefs.h"
 
 #define NUM_TRELLIS_STATES	8
 #define MAX_TRELLIS_LEN		(TURBO_MAX_K + 3)
@@ -110,6 +111,32 @@ API_EXPORT void free_tdec(struct tdecoder *dec)
 	free(dec);
 }
 
+
+
+int has_even_parity(unsigned int x) {
+	unsigned int count = 0, i, b = 1;
+
+	for (i = 0; i < 32; i++) {
+		if (x & (b << i)) { count++; }
+	}
+
+	if ((count % 2)) { return 0; }
+
+	return 1;
+}
+
+int has_odd_parity(unsigned int x) {
+	unsigned int count = 0, i, b = 1;
+
+	for (i = 0; i < 32; i++) {
+		if (x & (b << i)) { count++; }
+	}
+
+	if ((count % 2)) { return 1; }
+
+	return 0;
+}
+
 /*
  * Allocate decoder object
  *
@@ -152,11 +179,20 @@ static int turbo_iterate(struct vtrellis *trellis, int len,
 	/* Forward */
 	for (i = 0; i < len; i++) {
 		trellis->fwnorm[i] = gen_fw_metrics(tm[i].bm,
-						    x[i], z[i],
-						    tm[i].fwsums,
-						    tm[i + 1].fwsums,
-						    trellis->lvals[i]);
+			x[i], z[i],
+			tm[i].fwsums,
+			tm[i + 1].fwsums,
+			trellis->lvals[i]);
+
 	}
+
+	//printf("Data: ");
+	//for (size_t m = 0; m < len; m++)
+	//{
+	//	printf(" %i, ", trellis->fwnorm[m]);
+	//}
+	//printf("\n");
+
 
 	/* Backward */
 	for (i = len - 1; i >= 0; i--) {
@@ -165,6 +201,7 @@ static int turbo_iterate(struct vtrellis *trellis, int len,
 						   tm[i].fwsums,
 						   trellis->bwsums,
 						   trellis->fwnorm[i]);
+
 	}
 
 	return 0;
@@ -176,7 +213,8 @@ static inline void _turbo_decode(struct tdecoder *dec,
 				 const int8_t *d2)
 {
 	int i;
-	int8_t d0p[len + 3];
+//	int8_t d0p[len + 3];
+	int8_t d0p[16384 + 3];
 	struct vtrellis *trellis = dec->trellis;
 
 	turbo_interleave(len, (uint8_t *) d0, (uint8_t *) d0p);
@@ -184,6 +222,7 @@ static inline void _turbo_decode(struct tdecoder *dec,
 		     (uint8_t *) d2, (uint8_t *) d0p);
 
 	init_tdec(dec, len + 3);
+
 
 	for (i = 0; i < iter; i++) {
 		turbo_iterate(&trellis[0], dec->len, d0, d1);

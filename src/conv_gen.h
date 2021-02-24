@@ -105,7 +105,7 @@ static void _gen_path_metrics(int num_states, int16_t *sums,
 {
 	int i;
 	int16_t min;
-	int16_t new_sums[num_states];
+	int16_t new_sums[16];
 
 	for (i = 0; i < num_states / 2; i++) {
 		acs_butterfly(i, num_states, metrics[i],

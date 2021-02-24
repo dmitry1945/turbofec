@@ -28,7 +28,7 @@
 
 #include "turbofec/rate_match.h"
 
-#define API_EXPORT	__attribute__((__visibility__("default")))
+#include "turbofec/sysdefs.h"
 
 /*
  * Maximum block lengths
@@ -199,7 +199,8 @@ static void rate_match_fw(struct lte_rate_matcher *match,
 	int k_0 = R_TC_sb * (2 * (int) ceilf(N_cb / (8.0f * R_TC_sb)) * rv + 2);
 
 	/* For redundancy version 0 */
-	signed char w[w_len];
+//	signed char w[w_len];
+	signed char w[16384];
 
 	memcpy(w, match->v[0], V * sizeof(char));
 	for (i = 0; i < V; i++) {
@@ -277,7 +278,8 @@ static void scramble(signed char* d, int rows, signed char *v,
 static void readout_rows(signed char *v, int rows)
 {
 	int i, n;
-	signed char val[C_TC_SUBBLOCK * rows];
+	//signed char val[C_TC_SUBBLOCK * rows];
+	signed char val[C_TC_SUBBLOCK * 256];
 
 	for (i = 0; i < C_TC_SUBBLOCK; i++) {
 		for (n = 0; n < rows; n++)
@@ -290,7 +292,8 @@ static void readout_rows(signed char *v, int rows)
 static void readin_rows(signed char *v, int rows)
 {
 	int i, n;
-	signed char val[C_TC_SUBBLOCK * rows];
+	//signed char val[C_TC_SUBBLOCK * rows];
+	signed char val[C_TC_SUBBLOCK * 256];
 
 	for (i = 0; i < C_TC_SUBBLOCK; i++) {
 		for (n = 0; n < rows; n++)
@@ -308,7 +311,8 @@ static int interlv(signed char *v, int len, signed char *z)
 {
 	int i, rows = (int) ceilf((float) len / 32.0f);
 	int shift = rows * 32 - len;
-	signed char d_shift[rows * 32];
+//	signed char d_shift[rows * 32];
+	signed char d_shift[256 * 32];
 
 	for (i = 0; i < rows * 32; i++) {
 		if (i < shift)
@@ -333,7 +337,8 @@ static int interlv_v2(struct lte_rate_matcher *match)
 	int rows = match->rows;
 	signed char *v, *z;
 	int shift = rows * 32 - len;
-	signed char d_shift[rows * 32];
+//	signed char d_shift[rows * 32];
+	signed char d_shift[256 * 32];
 
 	v = match->v[2];
 	z = match->z[2];
@@ -434,7 +439,7 @@ static int rate_match_init_rv(struct lte_rate_matcher *match,
 	if ((D <= 0) || (E <= 0))
 		return -1;
 
-	signed char *e = calloc(E, sizeof(char));
+	signed char *e = (signed char*)calloc(E, sizeof(char));
 
 	rate_match_init_fw(match, NULL, D, e, E, rv);
 

@@ -30,8 +30,9 @@
 #include "conv_gen.h"
 #include "conv_sse.h"
 
-#define API_EXPORT	__attribute__((__visibility__("default")))
-#define PARITY(X) __builtin_parity(X)
+#include "turbofec/sysdefs.h"
+
+
 
 /*
  * Trellis State
@@ -100,6 +101,7 @@ static int16_t *vdec_malloc(size_t n)
 	// OSX guarentee's 16-byte alignment on the heap but lacks memalign() (Has posix_memalign though)
 	return (int16_t *) malloc(sizeof(int16_t) * n);
 #elif defined(HAVE_SSE3)
+	
 	return (int16_t *) memalign(SSE_ALIGN, sizeof(int16_t) * n);
 #else
 	return (int16_t *) malloc(sizeof(int16_t) * n);
@@ -458,7 +460,7 @@ static void _conv_decode(struct vdecoder *dec, const int8_t *seq, int len)
 static int conv_decode(struct vdecoder *dec, const int8_t *seq,
 			const int *punc, uint8_t *out, int len, int term)
 {
-	int8_t depunc[dec->len * dec->n];
+	int8_t depunc[8192];
 
 	reset_decoder(dec, term);
 

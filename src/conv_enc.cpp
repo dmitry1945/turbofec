@@ -22,10 +22,9 @@
 #include <stdint.h>
 #include <errno.h>
 #include "turbofec/conv.h"
+#include "turbofec/sysdefs.h"
 
-#define API_EXPORT	__attribute__((__visibility__("default")))
-#define PARITY(X)	__builtin_parity(X)
-#define POPCNT(X)	__builtin_popcount(X)
+
 
 static int puncture(const struct lte_conv_code *code,
 		    uint8_t *unpunct, uint8_t *output)
@@ -320,7 +319,7 @@ static int encode_rec_gen(const struct lte_conv_code *code,
 	int n = code->n;
 	int len = code->len;
 	int i, j, k = code->k;
-	int p[n];
+	int p[128];
 
 	for (i = 0; i < n; i++)
 		p[i] = POPCNT(gen[i]) == 1;
@@ -361,7 +360,8 @@ static int conv_encode(const struct lte_conv_code *code,
 {
 	int l;
 	uint8_t *_output;
-	uint8_t unpunct[(code->len + code->k - 1) * code->n];
+//	uint8_t unpunct[(code->len + code->k - 1) * code->n];
+	uint8_t unpunct[4096];
 
 	if (code->punc)
 		_output = unpunct;
@@ -398,7 +398,8 @@ static int conv_encode_rec(const struct lte_conv_code *code,
 	int l, pos = -1, cnt = 0;
 	const unsigned *gen = code->gen;
 	uint8_t *_output;
-	uint8_t unpunct[(code->len + code->k - 1) * code->n];
+//	uint8_t unpunct[(code->len + code->k - 1) * code->n];
+	uint8_t unpunct[4096];
 
 	if (code->term == CONV_TERM_TAIL_BITING)
 		return -ENOTSUP;
