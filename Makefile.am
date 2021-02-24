@@ -1,4 +1,4 @@
-ACLOCAL_AMFLAGS = -I m4 -no-undefined
+ACLOCAL_AMFLAGS = -I m4
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = turbofec.pc
